@@ -17,10 +17,10 @@ Everything else is required for coin-cell operation.
 
 <img src="images/2-PartEEpromLogger_CavePearlProject_2022.jpg" width="340" alt="finished 2-part logger"> <img src="images/20240713_2PartLogger_schematic_400x240pixw.png" width="400" alt="full wiring schematic">
 
-*Left: the finished 2-module stack. Right: the full schematic — keep it open while soldering
-(both files are local in [images/](images/)). Step photos throughout this guide are
-hotlinked from the [Cave Pearl Project tutorial](https://thecavepearlproject.org/2022/03/09/powering-a-promini-logger-for-one-year-on-a-coin-cell/)
-(© Edward Mallon) and need an internet connection to display.*
+*Left: the finished 2-module stack. Right: the full schematic — keep it open while soldering.
+Step photos throughout this guide are local copies (in [images/steps/](images/steps/)) of
+photographs from the [Cave Pearl Project tutorial](https://thecavepearlproject.org/2022/03/09/powering-a-promini-logger-for-one-year-on-a-coin-cell/)
+(© Edward Mallon), so the whole guide works offline at the bench.*
 
 ---
 
@@ -164,11 +164,11 @@ Then, per board:
 5. Clean flux residue with isopropyl (flux is mildly conductive and shows up as
    mystery-µA later).
 
-<img src="https://thecavepearlproject.org/wp-content/uploads/2023/11/jumper14_blinktesting_900pixw.jpg" width="220" alt="bootloader blink test"> <img src="https://thecavepearlproject.org/wp-content/uploads/2023/11/pm1_cliprega_900pixw_square.jpg" width="220" alt="clipping the regulator"> <img src="https://thecavepearlproject.org/wp-content/uploads/2023/11/pm6_ledlimitresistorb_900pixwsq.jpg" width="220" alt="removing power LED resistor"> <img src="https://thecavepearlproject.org/wp-content/uploads/2023/11/pm4_clipresetswitch_900pixwsq.jpg" width="220" alt="clipping the reset switch">
+<img src="images/steps/jumper14_blinktesting_900pixw.jpg" width="220" alt="bootloader blink test"> <img src="images/steps/pm1_cliprega_900pixw_square.jpg" width="220" alt="clipping the regulator"> <img src="images/steps/pm6_ledlimitresistorb_900pixwsq.jpg" width="220" alt="removing power LED resistor"> <img src="images/steps/pm4_clipresetswitch_900pixwsq.jpg" width="220" alt="clipping the reset switch">
 
 *L→R: blink test before any mods · clip the regulator (2-leg side) · lift the power-LED
 limit resistor · clip the reset switch. Header detail:
-[trimming the UART pin tails](https://thecavepearlproject.org/wp-content/uploads/2022/02/prom_headerpins_640pixw.jpg).*
+[trimming the UART pin tails](images/steps/prom_headerpins_640pixw.jpg).*
 
 > **VERIFY (Stage 1):** re-run `tests/01_UploadBlink`. Heartbeat still prints at 500000
 > baud and the **red D13 LED** still blinks (green/blue come later — red-only = PASS).
@@ -191,7 +191,7 @@ The DS3231 module is modified to run permanently from the coin cell ("backup" in
 6. **[OPTIONAL]** conformal-coat the module (avoiding the battery clip and header) after
    it passes Stage 3 testing.
 
-<img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/rtc_clipvcc_600pixw.jpg" width="220" alt="clipping RTC VCC leg"> <img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/rtc_disconnectpowerled_640pixw.jpg" width="220" alt="disconnecting RTC power LED"> <img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/rtc_bridgevcc-bkuppower_640pixw.jpg" width="220" alt="bridging VCC to backup power"> <img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/rtc_modscomplete_640pixw.jpg" width="220" alt="all RTC mods complete">
+<img src="images/steps/rtc_clipvcc_600pixw.jpg" width="220" alt="clipping RTC VCC leg"> <img src="images/steps/rtc_disconnectpowerled_640pixw.jpg" width="220" alt="disconnecting RTC power LED"> <img src="images/steps/rtc_bridgevcc-bkuppower_640pixw.jpg" width="220" alt="bridging VCC to backup power"> <img src="images/steps/rtc_modscomplete_640pixw.jpg" width="220" alt="all RTC mods complete">
 
 *L→R: clip the VCC leg · disconnect the power LED · bridge VCC to the coin-cell side at
 the diode's black ring · all mods done (use this last photo as your visual-QC reference).*
@@ -213,12 +213,12 @@ the diode's black ring · all mods done (use this last photo as your visual-QC r
 5. Solder the alarm line: **RTC SQW → Pro Mini D2** (resistor leg or 26 AWG).
 6. Insert a CR2032.
 
-<img src="https://thecavepearlproject.org/wp-content/uploads/2023/11/p3b_dstape2_900pixw.jpg" width="220" alt="foam tape on RTC chips"> <img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/i2cbus_2_hscrossover_600pixw.jpg" width="220" alt="I2C jumpers crossing over"> <img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/i2cbus_5_threadpassthrough_600pixw.jpg" width="220" alt="threading jumpers through pass-through"> <img src="https://thecavepearlproject.org/wp-content/uploads/2023/11/p3f_solderi2cjumpers_900pixw.jpg" width="220" alt="soldering the four I2C joints">
+<img src="images/steps/p3b_dstape2_900pixw.jpg" width="220" alt="foam tape on RTC chips"> <img src="images/steps/i2cbus_2_hscrossover_600pixw.jpg" width="220" alt="I2C jumpers crossing over"> <img src="images/steps/i2cbus_5_threadpassthrough_600pixw.jpg" width="220" alt="threading jumpers through pass-through"> <img src="images/steps/p3f_solderi2cjumpers_900pixw.jpg" width="220" alt="soldering the four I2C joints">
 
 *L→R: foam tape across the RTC chips · the A4/A5 **crossover** in heat-shrink · threading
 through the pass-through port · soldering the four joints.*
 
-<img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/d2alarmline_1_600pixh.jpg" width="220" alt="32kHz pin trimmed, SQW header"> <img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/d2_surfacejumper_3_640pixw.jpg" width="220" alt="finished SQW to D2 jumper">
+<img src="images/steps/d2alarmline_1_600pixh.jpg" width="220" alt="32kHz pin trimmed, SQW header"> <img src="images/steps/d2_surfacejumper_3_640pixw.jpg" width="220" alt="finished SQW to D2 jumper">
 
 *The alarm line: 32 kHz pin already trimmed, then the heat-shrinked SQW → D2 jumper.*
 
@@ -243,7 +243,7 @@ The main sketch expects `LED_GndGB_A0_A2`: common-cathode RGB with the **red leg
 3. No series resistor needed — the code lights the channels through the 328p's internal
    pullups (~36 kΩ), keeping LED current under 50 µA.
 
-<img src="https://thecavepearlproject.org/wp-content/uploads/2022/03/20230523_leda0-2_640pixw.jpg" width="300" alt="RGB LED on A0-A2">
+<img src="images/steps/20230523_leda0-2_640pixw.jpg" width="300" alt="RGB LED on A0-A2">
 
 *RGB LED seated on A0–A2 with the red leg removed.*
 
@@ -269,7 +269,7 @@ Solder, with each component's far ends joined at a common node with the 0.1 µF 
 | D9 | LDR (GL5528) |
 | GND | 0.1 µF (104) ceramic cap from the common node |
 
-<img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/ntccds_1_640pixw.jpg" width="220" alt="NTC and LDR component layout on D6-D9"> <img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/ntccds_2_640pixw.jpg" width="220" alt="components joined at common node"> <img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/ntccds_3_640pixw.jpg" width="220" alt="104 capacitor completes the timing circuit"> <img src="images/20240713_2PartLogger_schematic_400x240pixw.png" width="280" alt="schematic with D6-D9 node">
+<img src="images/steps/ntccds_1_640pixw.jpg" width="220" alt="NTC and LDR component layout on D6-D9"> <img src="images/steps/ntccds_2_640pixw.jpg" width="220" alt="components joined at common node"> <img src="images/steps/ntccds_3_640pixw.jpg" width="220" alt="104 capacitor completes the timing circuit"> <img src="images/20240713_2PartLogger_schematic_400x240pixw.png" width="280" alt="schematic with D6-D9 node">
 
 *L→R: component layout on D6–D9 · far ends gathered into the common node · the 104 cap
 completing the ICU timing circuit · the same node on the schematic (local copy).*
@@ -285,7 +285,7 @@ completing the ICU timing circuit · the same node on the schematic (local copy)
 
 Per unit, UART connected:
 
-<img src="https://thecavepearlproject.org/wp-content/uploads/2023/12/interconnecteduartpromini_1200pixw.jpg" width="280" alt="UART adapter connected to logger"> <img src="https://thecavepearlproject.org/wp-content/uploads/2023/11/contactpoints_calvref_large.jpg" width="280" alt="multimeter contact points for Vref calibration">
+<img src="images/steps/interconnecteduartpromini_1200pixw.jpg" width="280" alt="UART adapter connected to logger"> <img src="images/steps/contactpoints_calvref_large.jpg" width="280" alt="multimeter contact points for Vref calibration">
 
 *UART hookup for all Stage 6 work, and the VCC/GND contact points to probe while
 calibrating the voltage reference.*
@@ -317,7 +317,7 @@ calibrating the voltage reference.*
    - RTC temperature tracking the room, NTC ohms moving inversely to temperature, LDR
      tracking day/night.
 
-<img src="https://thecavepearlproject.org/wp-content/uploads/2023/07/20230725_bmp280_longburntestgraph_460pixw.jpg" width="320" alt="healthy long-run battery curve with BMP280"> <img src="https://thecavepearlproject.org/wp-content/uploads/2023/07/20230725_bh1750_longburntestgraph_460pixw.jpg" width="320" alt="healthy long-run battery curve with BH1750">
+<img src="images/steps/20230725_bmp280_longburntestgraph_460pixw.jpg" width="320" alt="healthy long-run battery curve with BMP280"> <img src="images/steps/20230725_bh1750_longburntestgraph_460pixw.jpg" width="320" alt="healthy long-run battery curve with BH1750">
 
 *What a healthy battery curve looks like over a full deployment (tutorial's 11–12 month
 runs with BMP280 and BH1750) — your 24–72 h burn-in should sit on the flat left end of
@@ -342,12 +342,12 @@ curves like these.*
    BMP temp. A `not PowerOfTwo → MUST CHANGE CONFIG!` shutdown means the defines don't
    match the profile — fix and re-flash.
 6. **[OPTIONAL]** add the rail buffer capacitor (220–1000 µF tantalum across VCC/GND,
-   [placement photo](https://thecavepearlproject.org/wp-content/uploads/2023/11/2023_indicator-on1000ufcap_900pixw.jpg))
+   [placement photo](images/steps/2023_indicator-on1000ufcap_900pixw.jpg))
    if a unit shows voltage-sag resets in burn-in data; costs only ~15–25 nA of leakage.
 7. Hot-glue the coin cell against its spring contact, run a final short logging interval
    (1-minute interval for an hour), download, and sign off the checklist.
 
-<img src="https://thecavepearlproject.org/wp-content/uploads/2022/02/bh1750dupontcable_640pixw.jpg" width="240" alt="Dupont cable I2C connection to sensor"> <img src="https://thecavepearlproject.org/wp-content/uploads/2023/12/2025_hotgluebattery1_660pixw.jpg" width="240" alt="hot glue on battery holder"> <img src="https://thecavepearlproject.org/wp-content/uploads/2023/12/2025_hotgluebattery4_660pixw.jpg" width="240" alt="glue conformed around coin cell">
+<img src="images/steps/bh1750dupontcable_640pixw.jpg" width="240" alt="Dupont cable I2C connection to sensor"> <img src="images/steps/2025_hotgluebattery1_660pixw.jpg" width="240" alt="hot glue on battery holder"> <img src="images/steps/2025_hotgluebattery4_660pixw.jpg" width="240" alt="glue conformed around coin cell">
 
 *L→R: F-F Dupont leads carrying the I2C bus out to a sensor (remember SDA/SCL crossover) ·
 hot-glue drops in the holder · the glue conformed around the seated cell.*
@@ -409,6 +409,6 @@ The repo root contains `2PartProMiniLoggerRail.stl` (logger carrier rail) and
 deployment housing. Print, slide the finished logger onto the rail, desiccant pack in the
 tube cap, and see the tutorial video for the o-ring details. Not part of batch bench QC.
 
-<img src="https://thecavepearlproject.org/wp-content/uploads/2022/03/2partloggerrails_2024.jpg" width="280" alt="3D printed rail system"> <img src="https://thecavepearlproject.org/wp-content/uploads/2022/03/2partrails5_intube_1024pixw_2024.jpg" width="280" alt="logger on rail inside tube with desiccant">
+<img src="images/steps/2partloggerrails_2024.jpg" width="280" alt="3D printed rail system"> <img src="images/steps/2partrails5_intube_1024pixw_2024.jpg" width="280" alt="logger on rail inside tube with desiccant">
 
 *The printed rail system and a completed logger in its tube with desiccant packs.*

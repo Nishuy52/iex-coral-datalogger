@@ -57,23 +57,62 @@ All other `#define` sensor lines in the sketch must stay commented out.
 
 ### Bill of materials
 
-| # | Component | Per unit | × N units |
-|---|-----------|---------:|----------:|
-| 1 | Pro Mini clone, **3.3 V / 8 MHz** ATmega328P | 1 | |
-| 2 | DS3231 RTC module with AT24C32 EEprom & CR2032 holder | 1 | |
-| 3 | CR2032 lithium coin cell (name brand; no rechargeable LIR2032) | 1 | |
-| 4 | Common-cathode 5 mm RGB LED (diffused) | 1 | |
-| 5 | 10 kΩ 1% metal-film resistor (D6 reference) | 1 | |
-| 6 | 10 kΩ NTC thermistor, β≈3950 (D7) | 1 | |
-| 7 | 300 Ω resistor, any type (D8) | 1 | |
-| 8 | LDR e.g. GL5528 (D9) | 1 | |
-| 9 | 0.1 µF (104) ceramic capacitor | 1 | |
-| 10 | BMP280 module, 3.3 V, I2C addr 0x76 | 1 | |
-| 11 | BH1750 module (GY-302/GY-30), I2C addr 0x23 | 1 | |
-| 12 | Header pins, 26 AWG wire / resistor-leg offcuts, heat-shrink | — | |
-| 13 | Double-sided foam tape | — | |
-| 14 | **[OPTIONAL]** 220–1000 µF rail buffer capacitor (tantalum, ≥25 V rating) | 1 | |
-| 15 | **[OPTIONAL]** 50 ml falcon tube + 3D-printed rail (see Appendix C) | 1 | |
+Grouped by subsystem so you can kit each build stage separately — for batch work, count
+out and bag each group per unit before the session starts.
+
+**Core logger** (Stages 1–3, every unit):
+
+| # | Component | Connects to | Per unit | × N units |
+|---|-----------|-------------|---------:|----------:|
+| 1 | Pro Mini clone, **3.3 V / 8 MHz** ATmega328P | — | 1 | |
+| 2 | DS3231 RTC module with AT24C32 EEprom & CR2032 holder | A4/A5 (I2C), SQW→D2, VCC, GND | 1 | |
+| 3 | CR2032 lithium coin cell (name brand; no rechargeable LIR2032) | RTC module holder | 1 | |
+| 4 | Header pins (6-pin UART strip + offcuts) | programming edge | 1 strip | |
+| 5 | 26 AWG wire / resistor-leg offcuts + heat-shrink | module-to-module joins | — | |
+| 6 | Double-sided foam tape | between the two boards | — | |
+
+**Indicator LED** (Stage 4):
+
+| # | Component | Connects to | Per unit | × N units |
+|---|-----------|-------------|---------:|----------:|
+| 7 | Common-cathode 5 mm RGB LED, diffused (red leg cut at assembly) | cathode→A0, green→A1, blue→A2 | 1 | |
+
+No series resistor — channels are driven through the 328p's internal pullups.
+
+**NTC / LDR burn-in circuit** (Stage 5):
+
+| # | Component | Connects to | Per unit | × N units |
+|---|-----------|-------------|---------:|----------:|
+| 8 | 10 kΩ **1% metal-film** resistor (reference — precision matters here) | D6 → common node | 1 | |
+| 9 | 10 kΩ NTC thermistor, β≈3950 | D7 → common node | 1 | |
+| 10 | 300 Ω resistor, any type | D8 → common node | 1 | |
+| 11 | LDR, e.g. GL5528 | D9 → common node | 1 | |
+| 12 | 0.1 µF (104) ceramic capacitor | common node → GND | 1 | |
+
+**BMP280 temperature sensor** (Stage 7):
+
+| # | Component | Connects to | Per unit | × N units |
+|---|-----------|-------------|---------:|----------:|
+| 13 | BMP280 breakout module, 3.3 V, I2C address 0x76 | VCC, GND, SDA (A4 side), SCL (A5 side) | 1 | |
+
+Buy genuine-looking GY-BMP280-3.3 boards; some "BMP280" listings ship BME280s (also fine —
+same library, chip ID 0x60 instead of 0x58 in `07_SensorTest`) or fakes that fail the scan.
+
+**BH1750 light sensor** (Stage 7):
+
+| # | Component | Connects to | Per unit | × N units |
+|---|-----------|-------------|---------:|----------:|
+| 14 | BH1750 breakout (GY-302 or GY-30), I2C address 0x23 | VCC, GND, SDA (A4 side), SCL (A5 side) | 1 | |
+
+Leave the ADDR pin unconnected/low (= 0x23). Both I2C sensors share the same four bus
+wires — chain them rather than running separate leads back to the ProMini.
+
+**[OPTIONAL] extras:**
+
+| # | Component | Used for | Per unit | × N units |
+|---|-----------|----------|---------:|----------:|
+| 15 | 220–1000 µF tantalum capacitor, ≥25 V rating | rail buffering (Stage 7 step 6) | 1 | |
+| 16 | 50 ml falcon tube + 3D-printed rail + desiccant | deployment housing (Appendix C) | 1 | |
 
 ### Tools
 

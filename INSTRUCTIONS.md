@@ -26,8 +26,9 @@ photographs from the [Cave Pearl Project tutorial](https://thecavepearlproject.o
 
 ## Build configuration used in this guide
 
-Two `#define` profiles for the main sketch keep the **powers-of-2 rule** satisfied
-(explained in [Appendix A](#appendix-a--the-powers-of-2-rule)):
+Three `#define` profiles for the main sketch keep the **powers-of-2 rule** satisfied
+(explained in [Appendix A](#appendix-a--the-powers-of-2-rule)). Pick one per unit and record
+it on the [checklist](CHECKLIST.md):
 
 **BURN-IN profile** — bare logger soak test, no external sensors (8 bytes/record):
 
@@ -54,8 +55,28 @@ Two `#define` profiles for the main sketch keep the **powers-of-2 rule** satisfi
 // BMP280 pressure (recordBMEpressure_2byteInt) is not used in this build.
 ```
 
-Both profiles store **512 records** in the RTC module's 4k EEprom — about **5.3 days at a
-15-minute interval** (or 8.5 hours at 1-minute, useful for quick shakedown runs).
+**DEPLOY-XL profile** — same sensors as DEPLOY, but logging to an external I2C EEprom
+([Appendix B](#appendix-b--optional-add-an-external-i2c-eeprom-for-more-storage)) for a much
+longer run (8 bytes/record):
+
+```cpp
+#define logLowestBattery_1byte
+#define logRTC_Temperature_1byte
+#define readD7resistorwD6ref_2byte       // NTC thermistor
+#define readBh1750_LUX_2byte             // BH1750 light sensor
+#define recordBMEtemp_2byteInt           // BMP280 temp via forcedBMX280 library
+#define LED_GndGB_A0_A2
+// storage -> external EEprom on the I2C bus. CHANGE BOTH copies of these defines
+// (the STEP0 block ~line 108 AND the duplicate ~line 146):
+#define EEpromI2Caddr 0x50
+#define totalBytesOfStorage 32768        // AT24C256 (32k); use 65536 for AT24C512 (64k)
+```
+
+The two sensor profiles (BURN-IN, DEPLOY) store **512 records** in the RTC module's 4k EEprom
+— about **5.3 days at a 15-minute interval** (or 8.5 hours at 1-minute, useful for quick
+shakedown runs). DEPLOY-XL extends that to **4096 records (~42 days)** on a 32k chip or
+**8192 records (~85 days)** on a 64k chip at 15-minute intervals. No code changes beyond the
+two defines are needed — the sketch adjusts its I2C bus speed and write timing automatically.
 All other `#define` sensor lines in the sketch must stay commented out.
 
 ---
@@ -319,7 +340,8 @@ through the pass-through port · soldering the four joints.*
 >    FAIL → re-flow the four joints; check the A4/A5 crossover.
 > 2. `tests/03_RTC_Test` → send `T` once to set the clock, then all four summary lines
 >    PASS. `D2 Alarm: FAIL` → re-flow the SQW→D2 jumper.
-> 3. `tests/04_EEprom_Test` → type `Y` → `EEPROM TEST: PASS (0 mismatches)`.
+> 3. `tests/04_EEprom_Test` → type `Y` → `ALL EEPROM TESTS: PASS` (tests the 4k now; it
+>    also tests an external EEprom at 0x50 later if you fit one).
 > Then pull the UART adapter and confirm the RTC keeps time on the coin cell alone:
 > reconnect after a minute and re-run `03_RTC_Test` — OSF must still read PASS.
 
@@ -560,13 +582,15 @@ powers-of-2 record rule from [Appendix A](#appendix-a--the-powers-of-2-rule) is 
 
 ### Verify before trusting it
 
-1. Edit `tests/04_EEprom_Test`'s two defines near the top to match — `EEPROM_ADDR 0x50` and
-   `EEPROM_BYTES 32768UL` (or `65536UL`) — then run it: expect `EEPROM TEST: PASS
-   (0 mismatches)` across the full chip. This is the real proof the chip and every joint
-   are good.
-2. Run `tests/02_I2C_Scanner` → it should now also list **0x50** alongside 0x57 and 0x68.
-3. Flash the main sketch with the updated defines; the startup `RUNtime:` line should now
-   report the larger byte total and a much longer run estimate.
+1. Set `EXTERNAL_BYTES` near the top of `tests/04_EEprom_Test` to your chip size (`32768UL`
+   for a 32k AT24C256, `65536UL` for a 64k AT24C512), then run it. The test auto-detects the
+   chip at 0x50, tests it alongside the 4k, and prints `ALL EEPROM TESTS: PASS` across every
+   byte. This is the real proof the chip and every joint are good.
+2. Run `tests/02_I2C_Scanner` → the summary line `EXTERNAL EEprom (0x50): found` confirms it
+   is on the bus alongside 0x57 and 0x68.
+3. Flash the main sketch with the **DEPLOY-XL profile** (see [Build configuration](#build-configuration-used-in-this-guide));
+   the startup `RUNtime:` line should now report the larger byte total and a much longer run
+   estimate.
 
 ### Cautions
 

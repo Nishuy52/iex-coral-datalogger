@@ -1,8 +1,8 @@
-// 02_I2C_Scanner - Stage 3 & Stage 7 verification for the 2-Part ProMini Logger
+// 02_I2C_Scanner - Stage 3 & Stage 5 verification for the 2-Part ProMini Logger
 // ------------------------------------------------------------------------------
 // PURPOSE: confirms the I2C bus wiring between the ProMini and the RTC module
-// (A4->SDA, A5->SCL crossover, VCC, GND) and later that the deployment sensors
-// (BMP280, BH1750) are connected and answering.
+// (A4->SDA, A5->SCL crossover, VCC, GND), and later that the deployment sensors
+// (BMP280, BH1750) and any external EEprom are connected and answering.
 //
 // BOARD SETTINGS:  Arduino Pro or Pro Mini / ATmega328P (3.3V, 8MHz)
 // SERIAL MONITOR:  500000 baud
@@ -11,8 +11,9 @@
 //     0x57  EEprom 4k (RTC module)      <- REQUIRED
 //     0x68  DS3231 RTC                  <- REQUIRED
 //     CORE CHECK: PASS
-// EXPECTED after Stage 7 adds the sensors:
+// EXPECTED after Stage 5 adds the sensors (+ optional external EEprom):
 //     0x23  BH1750 light sensor
+//     0x50  external EEprom             (only if you fitted one - Appendix B)
 //     0x76  BMP280 pressure/temp sensor
 //
 // If CORE CHECK: FAIL -> re-check the four solder joints between the boards.
@@ -25,7 +26,7 @@ const char* deviceName(byte addr) {
   switch (addr) {
     case 0x23: return "BH1750 light sensor [deploy sensor]";
     case 0x5C: return "BH1750 light sensor (ADDR pin high)";
-    case 0x50: return "32k/64k EEprom module [optional]";
+    case 0x50: return "external EEprom 32k/64k [optional]";
     case 0x57: return "EEprom 4k (RTC module) ** REQUIRED **";
     case 0x68: return "DS3231 RTC             ** REQUIRED **";
     case 0x76: return "BMP280 pressure/temp [deploy sensor]";
@@ -49,7 +50,7 @@ void setup() {
 
 void loop() {
   byte found = 0;
-  bool haveRTC = false, haveEEprom = false, haveBMP = false, haveBH = false;
+  bool haveRTC = false, haveEEprom = false, haveBMP = false, haveBH = false, haveExtEE = false;
 
   Serial.println(F("\nScanning 0x08-0x77 ..."));
   for (byte addr = 0x08; addr <= 0x77; addr++) {
@@ -65,6 +66,7 @@ void loop() {
       if (addr == 0x57) haveEEprom = true;
       if (addr == 0x76 || addr == 0x77) haveBMP = true;
       if (addr == 0x23 || addr == 0x5C) haveBH = true;
+      if (addr == 0x50) haveExtEE = true;
     }
     delay(2);
   }
@@ -77,7 +79,10 @@ void loop() {
   Serial.print(haveBMP ? F("found") : F("absent"));
   Serial.print(F(", BH1750 "));
   Serial.print(haveBH ? F("found") : F("absent"));
-  Serial.println(F("   (absent = PASS until Stage 7)"));
+  Serial.println(F("   (absent = PASS until Stage 5)"));
+  Serial.print(F("EXTERNAL EEprom (0x50): "));
+  Serial.print(haveExtEE ? F("found") : F("absent"));
+  Serial.println(F("   (absent = PASS unless you fitted one)"));
 
   delay(3000);
 }

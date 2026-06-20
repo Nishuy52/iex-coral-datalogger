@@ -41,6 +41,8 @@ const char* deviceName(byte addr) {
 void setup() {
   Serial.begin(500000);
   Wire.begin();
+  Wire.setWireTimeout(25000, true);   // 25ms TWI timeout + auto bus-reset: a stuck/held
+                                      // line fails fast so the scan returns instead of crawling
   Serial.println();
   Serial.println(F("====================================================="));
   Serial.println(F(" 02_I2C_Scanner - bus wiring check (rescans every 3s)"));

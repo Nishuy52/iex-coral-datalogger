@@ -374,9 +374,57 @@ curves like these.*
 
 ## Stage 5 — Deployment sensors & final QC
 
-1. Wire the **BMP280** and **BH1750** modules to the shared I2C bus: VCC, GND, SDA (A4
-   side), SCL (A5 side). Keep leads short; both boards are 3.3 V-safe as used here.
-2. Run `tests/02_I2C_Scanner` → sensor lines now show `BMP280 found, BH1750 found`.
+### Wiring the shared I2C bus (both sensors + optional EEprom)
+
+I2C is a **shared bus**: every device hangs off the *same* four wires — VCC, GND, SDA, SCL.
+You do **not** run a separate cable back to the Pro Mini for each module. You extend the one
+bus and tap each module onto it in parallel. That bus originates at the Pro Mini's **A4 (SDA)**
+and **A5 (SCL)** plus the **3.3 V** and **GND** rails — the same lines that, after Stage 3,
+already run across to the RTC module (which carries the DS3231 at 0x68 and the on-board 4k
+EEprom at 0x57). The two sensors — and the optional external EEprom from
+[Appendix B](#appendix-b--optional-add-an-external-i2c-eeprom-for-more-storage) — all join
+that same bus.
+
+<img src="images/i2c_bus_wiring.svg" width="560" alt="shared I2C bus: BMP280, BH1750 and optional EEprom all tap the same four wires">
+
+**Every device gets the same four connections** (only the address differs):
+
+| Wire | Goes to | Rail it joins |
+|------|---------|---------------|
+| VCC | module VCC / 3V3 / VIN | 3.3 V rail (never 5 V) |
+| GND | module GND | GND rail |
+| SDA | module SDA | A4 line |
+| SCL | module SCL | A5 line |
+
+**Addresses already on the bus (all distinct — nothing collides):**
+
+| Address | Device |
+|---------|--------|
+| 0x23 | BH1750 light sensor |
+| 0x50 | external EEprom *(only if fitted — Appendix B)* |
+| 0x57 | 4k EEprom on the RTC module |
+| 0x68 | DS3231 RTC |
+| 0x76 | BMP280 |
+
+**How to join them physically:**
+
+- **Daisy-chain (recommended for these 2–3 modules):** carry all four wires from the bus to
+  the first module, then from that module's pins on to the next, and so on. Short F-F Dupont
+  leads or solid-core resistor-leg offcuts both work; remember the SDA/SCL **crossover** still
+  applies on the leads coming off the logger (A4→SDA, A5→SCL).
+- Keep the whole bus short (a few cm of total wiring). Long stubs degrade the signal and make
+  the scanner miss devices.
+- **Pull-ups:** SDA and SCL need pull-up resistors to VCC. The `Wire` library already enables
+  the 328p's internal ~30–50 kΩ pull-ups, and most cheap breakout modules carry their own
+  4.7–10 kΩ pull-ups. For this short 2–3 device bus that is fine — **do not** add extra
+  pull-ups (too many in parallel overloads the bus). Stacking many modules is the one case
+  where you'd remove the on-board pull-ups from all but one.
+
+1. Wire the **BMP280** and **BH1750** (and the external EEprom, if you're fitting one) onto
+   the shared I2C bus as shown above — same VCC/GND/SDA/SCL on every module, 3.3 V only.
+2. Run `tests/02_I2C_Scanner` → it should list every device on the bus: `0x23`, `0x68`,
+   `0x76` (and `0x50` if the EEprom is fitted), with sensor lines showing `BMP280 found,
+   BH1750 found`. A missing address means that module's joint or address is the problem.
 3. Run `tests/07_SensorTest` → both sensors report; finger on the BMP280 raises the
    temperature, covering the BH1750 drops lux toward 0. Plausible-but-frozen values mean
    a dead sensor on a good bus.
@@ -475,8 +523,9 @@ wires to the same four I2C lines you already use for the sensors:
 | SCL | A5 side of the bus |
 | A0 / A1 / A2 | all left **low/unconnected → address 0x50** |
 
-Chain it onto the existing sensor bus (don't run separate leads back to the Pro Mini), the
-same way the BMP280 and BH1750 share the bus in Stage 5.
+Chain it onto the existing sensor bus exactly as described in
+[Stage 5 → Wiring the shared I2C bus](#wiring-the-shared-i2c-bus-both-sensors--optional-eeprom)
+(don't run separate leads back to the Pro Mini) — it just adds one more device, at 0x50.
 
 **Method 2 — chip stacked on the RTC module (advanced).** An AT24C512 soldered piggyback
 on top of the module's existing AT24C32. Tutorial: *"you only need connect the four pins

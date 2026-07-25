@@ -30,8 +30,8 @@ constant and sleep current are unique per chip and cannot be reconstructed later
 | ☐ | 4 | Burn-in download clean (no gaps/resets, battery curve flat) | records: ______ |
 | ☐ | 5 | Sensors wired; `02_I2C_Scanner` sees 0x76 + 0x23 | |
 | ☐ | 5 | `07_SensorTest`: temp rises to touch, lux drops when covered | |
-| ☐ | 5 | **[OPT]** External EEprom fitted: `02` sees 0x50; `04` ALL PASS | size: ____k |
-| ☐ | 5 | Profile flashed; startup lists 8 bytes/rec, 5 channels | ☐ DEPLOY ☐ DEPLOY-XL |
+| ☐ | 5 | External 64k EEprom fitted: `02` sees 0x50; `04` ALL PASS | |
+| ☐ | 5 | DEPLOY profile flashed; startup lists 8 bytes/rec, 5 channels, 65536 B storage | |
 | ☐ | 5 | Coin cell hot-glued; final 1-h shakedown download clean | |
 
 ## Final

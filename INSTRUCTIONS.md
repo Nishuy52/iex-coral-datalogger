@@ -26,7 +26,7 @@ photographs from the [Cave Pearl Project tutorial](https://thecavepearlproject.o
 
 ## Build configuration used in this guide
 
-Three `#define` profiles for the main sketch keep the **powers-of-2 rule** satisfied
+Two `#define` profiles for the main sketch keep the **powers-of-2 rule** satisfied
 (explained in [Appendix A](#appendix-a--the-powers-of-2-rule)). Pick one per unit and record
 it on the [checklist](CHECKLIST.md):
 
@@ -41,7 +41,9 @@ it on the [checklist](CHECKLIST.md):
 #define LED_GndGB_A0_A2
 ```
 
-**DEPLOY profile** — BMP280 (temperature only) + BH1750 attached (8 bytes/record):
+**DEPLOY profile** — BMP280 (temperature only) + BH1750 attached, logging to the external
+64k AT24C512 EEprom ([Appendix B](#appendix-b--add-an-external-i2c-eeprom-for-more-storage))
+(8 bytes/record):
 
 ```cpp
 #define logLowestBattery_1byte
@@ -50,34 +52,21 @@ it on the [checklist](CHECKLIST.md):
 #define readBh1750_LUX_2byte             // BH1750 light sensor
 #define recordBMEtemp_2byteInt           // BMP280 temp via forcedBMX280 library
 #define LED_GndGB_A0_A2
+// storage -> external 64k EEprom on the I2C bus. These appear in TWO places
+// (the STEP0 block ~line 108 AND the duplicate ~line 146) - both must agree:
+#define EEpromI2Caddr 0x50
+#define totalBytesOfStorage 65536        // AT24C512 (64k)
 // readD9resistorwD6ref_2byte stays commented out: the LDR remains soldered
 // but is not logged - the BH1750 measures light far better.
 // BMP280 pressure (recordBMEpressure_2byteInt) is not used in this build.
 ```
 
-**DEPLOY-XL profile** — same sensors as DEPLOY, but logging to an external I2C EEprom
-([Appendix B](#appendix-b--optional-add-an-external-i2c-eeprom-for-more-storage)) for a much
-longer run (8 bytes/record):
-
-```cpp
-#define logLowestBattery_1byte
-#define logRTC_Temperature_1byte
-#define readD7resistorwD6ref_2byte       // NTC thermistor
-#define readBh1750_LUX_2byte             // BH1750 light sensor
-#define recordBMEtemp_2byteInt           // BMP280 temp via forcedBMX280 library
-#define LED_GndGB_A0_A2
-// storage -> external EEprom on the I2C bus. CHANGE BOTH copies of these defines
-// (the STEP0 block ~line 108 AND the duplicate ~line 146):
-#define EEpromI2Caddr 0x50
-#define totalBytesOfStorage 32768        // AT24C256 (32k); use 65536 for AT24C512 (64k)
-```
-
-The two sensor profiles (BURN-IN, DEPLOY) store **512 records** in the RTC module's 4k EEprom
-— about **5.3 days at a 15-minute interval** (or 8.5 hours at 1-minute, useful for quick
-shakedown runs). DEPLOY-XL extends that to **4096 records (~42 days)** on a 32k chip or
-**8192 records (~85 days)** on a 64k chip at 15-minute intervals. No code changes beyond the
-two defines are needed — the sketch adjusts its I2C bus speed and write timing automatically.
-All other `#define` sensor lines in the sketch must stay commented out.
+The BURN-IN profile stores **512 records** in the RTC module's 4k EEprom — about **5.3 days
+at a 15-minute interval** (or 8.5 hours at 1-minute, useful for quick shakedown runs).
+DEPLOY logs to the external 64k chip instead: **8192 records (~85 days at 15 min)**. No code
+changes beyond the two storage defines are needed — the sketch adjusts its I2C bus speed and
+write timing automatically. All other `#define` sensor lines in the sketch must stay
+commented out.
 
 ---
 
@@ -269,7 +258,7 @@ limit resistor. Header detail:
 
 Following the Cave Pearl tutorial, these are soldered onto the Pro Mini **now, during prep,
 before the two modules are joined**. All are **required** for this build: every profile in
-this guide (BURN-IN, DEPLOY, DEPLOY-XL) drives the RGB LED and logs the NTC channel, and
+this guide (BURN-IN, DEPLOY) drives the RGB LED and logs the NTC channel, and
 the BURN-IN profile also logs the LDR for the Stage 4 soak test.
 
 **RGB indicator LED** — the main sketch expects `LED_GndGB_A0_A2`: common-cathode RGB with
@@ -428,18 +417,18 @@ curves like these.*
 
 ## Stage 5 — Deployment sensors & final QC
 
-### Wiring the shared I2C bus (both sensors + optional EEprom)
+### Wiring the shared I2C bus (both sensors + the 64k EEprom)
 
 I2C is a **shared bus**: every device hangs off the *same* four wires — VCC, GND, SDA, SCL.
 You do **not** run a separate cable back to the Pro Mini for each module. You extend the one
 bus and tap each module onto it in parallel. That bus originates at the Pro Mini's **A4 (SDA)**
 and **A5 (SCL)** plus the **3.3 V** and **GND** rails — the same lines that, after Stage 3,
 already run across to the RTC module (which carries the DS3231 at 0x68 and the on-board 4k
-EEprom at 0x57). The two sensors — and the optional external EEprom from
-[Appendix B](#appendix-b--optional-add-an-external-i2c-eeprom-for-more-storage) — all join
-that same bus.
+EEprom at 0x57). The two sensors — and the external 64k EEprom from
+[Appendix B](#appendix-b--add-an-external-i2c-eeprom-for-more-storage), which the DEPLOY
+profile logs to — all join that same bus.
 
-<img src="images/i2c_bus_wiring.svg" width="560" alt="shared I2C bus: BMP280, BH1750 and optional EEprom all tap the same four wires">
+<img src="images/i2c_bus_wiring.svg" width="560" alt="shared I2C bus: BMP280, BH1750 and 64k EEprom all tap the same four wires">
 
 **Every device gets the same four connections** (only the address differs):
 
@@ -455,7 +444,7 @@ that same bus.
 | Address | Device |
 |---------|--------|
 | 0x23 | BH1750 light sensor |
-| 0x50 | external EEprom *(only if fitted — Appendix B)* |
+| 0x50 | external 64k EEprom — DEPLOY storage *(Appendix B)* |
 | 0x57 | 4k EEprom on the RTC module |
 | 0x68 | DS3231 RTC |
 | 0x76 | BMP280 |
@@ -529,7 +518,7 @@ hot-glue drops in the holder · the glue conformed around the seated cell.*
 | Sleep current 3–10 µA | Flux residue (clean with isopropyl), meter burden voltage, optional cap leakage |
 | `not PowerOfTwo → MUST CHANGE CONFIG!` at startup | Enabled `#define`s don't sum to 1/2/4/8/16 bytes — use a profile from this guide verbatim |
 | Logger starts then dies randomly on battery | Weak coin-cell spring contact; cell below ~2850 mV under load |
-| Readings stop partway through a deployment | EEprom full (512 records) — normal; lengthen the interval or add an external EEprom ([Appendix B](#appendix-b--optional-add-an-external-i2c-eeprom-for-more-storage)) |
+| Readings stop partway through a deployment | EEprom full — normal (512 records on the RTC 4k for BURN-IN, 8192 on the DEPLOY 64k chip — [Appendix B](#appendix-b--add-an-external-i2c-eeprom-for-more-storage)); lengthen the interval for longer runs |
 
 ---
 
@@ -552,13 +541,13 @@ That is why both profiles above pad or trim to exactly 8 bytes.
 | `readBh1750_LUX_2byte` | 2 |
 | `recordBMEtemp_2byteInt` (BMP280) | 2 |
 
-## Appendix B — [OPTIONAL] add an external I2C EEprom for more storage
+## Appendix B — add an external I2C EEprom for more storage
 
 The 4k EEprom on the RTC module holds only **512 records** at 8 bytes each (~5.3 days at
 15 min). The tutorial shows how to add a larger AT24-series I2C EEprom to extend that — the
-logger code already supports it, so this is mostly a wiring + two-`#define` change. **Not
-needed for the 27 Jun prototype** (it stays cut from [BUILD_PLAN.md](BUILD_PLAN.md)); do it
-only if a deployment needs a longer unattended run.
+logger code already supports it, so this is mostly a wiring + two-`#define` change. **The
+DEPLOY profile logs to a 64k AT24C512 at 0x50, so every deployment unit gets this chip in
+Stage 5**; only the BURN-IN shakedown still runs on the RTC module's 4k.
 
 ### Capacity you gain
 
@@ -589,7 +578,7 @@ wires to the same four I2C lines you already use for the sensors:
 | A0 / A1 / A2 | all left **low/unconnected → address 0x50** |
 
 Chain it onto the existing sensor bus exactly as described in
-[Stage 5 → Wiring the shared I2C bus](#wiring-the-shared-i2c-bus-both-sensors--optional-eeprom)
+[Stage 5 → Wiring the shared I2C bus](#wiring-the-shared-i2c-bus-both-sensors--the-64k-eeprom)
 (don't run separate leads back to the Pro Mini) — it just adds one more device, at 0x50.
 
 **Method 2 — chip stacked on the RTC module (advanced).** An AT24C512 soldered piggyback
@@ -605,15 +594,16 @@ on the RTC module — the added chip answers at 0x50 while the original 4k stays
 
 ### Configure the sketch
 
-Change **both** copies of these defines in `2-Part_ProMiniFalconTubeLogger.ino` — the STEP0
-block (around line 108) **and** the duplicate ~40 lines below (around line 146). Both must
-agree or the runtime capacity math is wrong:
+The DEPLOY sketch (`2-Part_Logger_DEPLOY`) already ships with these set for the 64k
+AT24C512. If you fit a different chip size, change **both** copies of the defines — the
+STEP0 block (around line 108) **and** the duplicate ~40 lines below (around line 146). Both
+must agree or the runtime capacity math is wrong:
 
 ```cpp
-// 32k AT24C256 module:
+// 64k AT24C512 (as shipped in the DEPLOY sketch):
 #define EEpromI2Caddr 0x50
-#define totalBytesOfStorage 32768
-// 64k AT24C512 chip:  use 0x50 and 65536
+#define totalBytesOfStorage 65536
+// 32k AT24C256 module:  use 0x50 and 32768
 ```
 
 That is all the code needs — it keys its I2C bus speed and EEprom write-recovery timing off
@@ -631,7 +621,7 @@ powers-of-2 record rule from [Appendix A](#appendix-a--the-powers-of-2-rule) is 
    byte. This is the real proof the chip and every joint are good.
 2. Run `tests/02_I2C_Scanner` → the summary line `EXTERNAL EEprom (0x50): found` confirms it
    is on the bus alongside 0x57 and 0x68.
-3. Flash the main sketch with the **DEPLOY-XL profile** (see [Build configuration](#build-configuration-used-in-this-guide));
+3. Flash the main sketch with the **DEPLOY profile** (see [Build configuration](#build-configuration-used-in-this-guide));
    the startup `RUNtime:` line should now report the larger byte total and a much longer run
    estimate.
 
@@ -681,11 +671,11 @@ once per interval is the visible "still alive" sign.
 very short intervals leave little margin — overrun an alarm and the logger waits for the
 next one.
 
-**Storage and run length.** Records are written to the 4k EEprom on the RTC module — 512
-records of 8 bytes. When it fills, logging simply stops; the firmware does not wrap or
-overwrite, so the earliest data is always safe. Run length = 512 × interval (≈ 5.3 days at
-15 min, ≈ 8.5 h at 1 min). For longer deployments lengthen the interval or fit the optional
-32k EEprom ([Appendix B](#appendix-b--optional-storage-upgrade)).
+**Storage and run length.** Records are written to the external 64k EEprom
+([Appendix B](#appendix-b--add-an-external-i2c-eeprom-for-more-storage)) — 8192 records of
+8 bytes. When it fills, logging simply stops; the firmware does not wrap or overwrite, so
+the earliest data is always safe. Run length = 8192 × interval (≈ 85 days at 15 min,
+≈ 5.7 days at 1 min). For longer deployments lengthen the interval.
 
 **Starting a run.** The logger is only ever started through the serial menu at
 500000 baud. The sequence is `[2]` set the RTC clock → `[10]`

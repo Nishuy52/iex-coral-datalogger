@@ -11,9 +11,9 @@
 //     0x57  EEprom 4k (RTC module)      <- REQUIRED
 //     0x68  DS3231 RTC                  <- REQUIRED
 //     CORE CHECK: PASS
-// EXPECTED after Stage 5 adds the sensors (+ optional external EEprom):
+// EXPECTED after Stage 5 adds the sensors + the 64k EEprom (DEPLOY storage):
 //     0x23  BH1750 light sensor
-//     0x50  external EEprom             (only if you fitted one - Appendix B)
+//     0x50  external 64k EEprom          (DEPLOY units log here - Appendix B)
 //     0x76  BMP280 pressure/temp sensor
 //
 // If CORE CHECK: FAIL -> re-check the four solder joints between the boards.
@@ -26,7 +26,7 @@ const char* deviceName(byte addr) {
   switch (addr) {
     case 0x23: return "BH1750 light sensor [deploy sensor]";
     case 0x5C: return "BH1750 light sensor (ADDR pin high)";
-    case 0x50: return "external EEprom 32k/64k [optional]";
+    case 0x50: return "external EEprom 32k/64k [DEPLOY storage]";
     case 0x57: return "EEprom 4k (RTC module) ** REQUIRED **";
     case 0x68: return "DS3231 RTC             ** REQUIRED **";
     case 0x76: return "BMP280 pressure/temp [deploy sensor]";

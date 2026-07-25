@@ -37,7 +37,7 @@ clean multi-day data download) demonstrated by **Sat 27 Jun**.
 | **Tue 16 Jun** | Download shakedown data ×3. Check: no gaps, battery flat, NTC/LDR responding. Then re-flash, **15-min interval**, start the real 48–72 h burn-in on coin cell. | Stage 4 |
 | **Wed 17 Jun** | Burn-in running — hands off. Prep sensor modules: bench-test every BMP280 & BH1750 on a spare ProMini (`02` + `07`) so only known-good sensors get soldered. | Stage 5 prep |
 | **Thu 18 Jun** | Burn-in running. Buffer day for any rework queued from earlier checks. | — |
-| **Fri 19 Jun** | **GATE B: download burn-in from all 3; ≥1 unit (target 2) must be clean.** Stage 5 on the two best units: solder BMP280 + BH1750 to the I2C bus, `02_I2C_Scanner` sees 0x76 + 0x23, `07_SensorTest` wiggle test PASS. | Stage 5 |
+| **Fri 19 Jun** | **GATE B: download burn-in from all 3; ≥1 unit (target 2) must be clean.** Stage 5 on the two best units: solder BMP280 + BH1750 + 64k EEprom to the I2C bus, `02_I2C_Scanner` sees 0x76 + 0x23 + 0x50, `07_SensorTest` wiggle test PASS. | Stage 5 |
 | **Sat 20 Jun** | Flash DEPLOY profile on both; startup must list 8 bytes/rec + 5 channels. Short live test (1-min interval, ~1 h), download, confirm all channels sane. | Stage 5 |
 | **Sun 21 Jun** | Rework buffer: fix anything Sat exposed. Hot-glue coin cells. Final visual QC under magnification, flux cleanup. | — |
 | **Mon 22 Jun** | **GATE C — LAST SOLDER DAY.** Any joint you're unsure about gets re-flowed this morning. Evening: fresh CR2032s, flash/menu sequence (clock `[2]`, constant `[10]`, **15-min interval** `[3]`, START `[6]`) on both units. Final burn-in begins tonight. | Stage 4 seq. |
@@ -74,7 +74,7 @@ clean multi-day data download) demonstrated by **Sat 27 Jun**.
   unit showed the exact symptom they exist to prevent: `LoBat[mv]`/`RTC[°C]` read healthy
   while `[°C]bmE` stuck at a fixed wrong value and `D7[Ω]` read implausibly low, only when
   running on the coin cell (fine over UART) — see the diagnostic note in
-  [INSTRUCTIONS.md](INSTRUCTIONS.md#wiring-the-shared-i2c-bus-both-sensors--optional-eeprom).
+  [INSTRUCTIONS.md](INSTRUCTIONS.md#wiring-the-shared-i2c-bus-both-sensors--the-64k-eeprom).
   Add the 220–1000 µF tantalum rail cap to any unit showing this pattern.
 - Remaining batch units: park them at whatever stage their parts are in; resume with the
   normal INSTRUCTIONS.md assembly-line flow after the 27th.

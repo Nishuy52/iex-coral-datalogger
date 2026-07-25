@@ -53,10 +53,10 @@
     <text x="460" y="258" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">BH1750</text>
     <text x="460" y="277" text-anchor="middle" font-size="11" fill="#333">0x23 · light</text>
 
-    <rect x="560" y="234" width="120" height="58" rx="6" fill="#fbfbf4" stroke="#777" stroke-width="1.5" stroke-dasharray="5 3"/>
-    <text x="620" y="258" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">AT24C256</text>
+    <rect x="560" y="234" width="120" height="58" rx="6" fill="#ffffff" stroke="#111" stroke-width="1.5"/>
+    <text x="620" y="258" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">AT24C512</text>
     <text x="620" y="277" text-anchor="middle" font-size="11" fill="#333">0x50 · EEprom</text>
-    <text x="620" y="226" text-anchor="middle" font-size="10" font-style="italic" fill="#777">[optional]</text>
+    <text x="620" y="226" text-anchor="middle" font-size="10" font-style="italic" fill="#777">64k · DEPLOY storage</text>
   </g>
 
   <text x="380" y="316" text-anchor="middle" font-size="11" fill="#444">Each module's VCC·GND·SDA·SCL pins join the matching rail — wire the bus once and tap every device onto it.</text>

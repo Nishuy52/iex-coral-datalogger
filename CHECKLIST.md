@@ -13,10 +13,10 @@ constant and sleep current are unique per chip and cannot be reconstructed later
 | ✔ | Stage | Check | Result / value |
 |---|-------|-------|----------------|
 | ☐ | 1 | Bootloader OK (`01_UploadBlink` heartbeat before any mods) | |
-| ☐ | 1 | Regulator, power-LED resistor, reset switch removed; UART header on | |
+| ☐ | 1 | Regulator + power-LED resistor removed; UART header on | |
 | ☐ | 1 | `01_UploadBlink` re-run after mods (onboard D13 blinks, any colour) | |
-| ☐ | 1 | **[OPT]** RGB LED fitted: all 3 colours rotate in `01_UploadBlink` | |
-| ☐ | 1 | **[OPT]** NTC/LDR circuit soldered (D6 10k ref, D7 NTC, D8 300Ω, D9 LDR, 104 cap) | |
+| ☐ | 1 | RGB LED fitted: all 3 colours rotate in `01_UploadBlink` | |
+| ☐ | 1 | NTC/LDR circuit soldered (D6 10k ref, D7 NTC, D8 300Ω, D9 LDR, 104 cap) | |
 | ☐ | 2 | RTC module: charge resistor, LED resistor, VCC leg, 32 kHz pin removed | |
 | ☐ | 2 | VCC bridged to Vbat side at diode | |
 | ☐ | 3 | `02_I2C_Scanner` → CORE CHECK: PASS (0x68 + 0x57) | |

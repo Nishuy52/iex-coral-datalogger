@@ -99,7 +99,7 @@ out and bag each group per unit before the session starts.
 | 5 | 26 AWG wire / resistor-leg offcuts + heat-shrink | module-to-module joins | — | |
 | 6 | Double-sided foam tape | between the two boards | — | |
 
-**Indicator LED** (Stage 1, **[OPTIONAL]**):
+**Indicator LED** (Stage 1):
 
 | # | Component | Connects to | Per unit | × N units |
 |---|-----------|-------------|---------:|----------:|
@@ -107,7 +107,7 @@ out and bag each group per unit before the session starts.
 
 No series resistor — channels are driven through the 328p's internal pullups.
 
-**NTC / LDR burn-in circuit** (Stage 1, **[OPTIONAL]**):
+**NTC / LDR burn-in circuit** (Stage 1):
 
 | # | Component | Connects to | Per unit | × N units |
 |---|-----------|-------------|---------:|----------:|
@@ -148,19 +148,54 @@ Soldering iron + fine solder, flush cutters, **3.3 V** USB-UART adapter (FTDI Ba
 CP2102, 6-pin), multimeter with a **µA range**, DVM leads, isopropyl alcohol + brush for
 flux cleanup, hot glue (battery retention).
 
-### Software (install once)
+### Arduino IDE setup (install once)
 
-1. [Arduino IDE](https://www.arduino.cc/en/software). Board setting for everything in this
-   guide: **Tools ▸ Board ▸ Arduino Pro or Pro Mini**, **Processor ▸ ATmega328P (3.3 V, 8 MHz)**.
-2. Libraries (Sketch ▸ Include Library ▸ Manage Libraries…):
-   - **LowPower** by LowPowerLab — required by the main sketch and `06_SleepCurrent`
-   - **hp_BH1750** by Stefan Armborst — BH1750 (main sketch + `07_SensorTest`)
-   - **ForcedBMX280** by soylentOrange — BMP280 (main sketch + `07_SensorTest`)
-3. Serial monitor is always **500000 baud** (it is 8 MHz ÷ 16 — the only fast rate with
-   zero clock error on these boards). Garbled text almost always means the wrong baud rate.
+**1. Install the Arduino IDE** from [arduino.cc/en/software](https://www.arduino.cc/en/software)
+(IDE 2.x; the classic 1.8.x also works). No extra board package is needed — the Pro Mini is
+covered by the built-in **Arduino AVR Boards** core.
 
-> **VERIFY (Stage 0):** `tests/01_UploadBlink` compiles in the IDE with the board settings
-> above, and the three libraries appear in Sketch ▸ Include Library.
+**2. Install the CP2102 USB-UART driver.** The adapter is not usable until Windows has the
+Silicon Labs driver:
+
+1. Download the **CP210x Universal Windows Driver** from Silicon Labs:
+   [silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers](https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers)
+   (Downloads tab).
+2. Unzip, right-click `silabser.inf` → **Install** (or: Device Manager → the flagged
+   `CP2102 USB to UART Bridge Controller` → Update driver → browse to the unzipped folder).
+3. Verify: plug the adapter in — Device Manager ▸ **Ports (COM & LPT)** must show
+   **Silicon Labs CP210x USB to UART Bridge (COMx)**. Note the COM number; that is the
+   port you select in the IDE. If it instead appears under *Other devices* with a warning
+   triangle, the driver didn't take — repeat step 2.
+
+*macOS 11+ and Linux have the driver built in — the adapter shows up as
+`/dev/tty.usbserial-*` / `/dev/ttyUSB0` with no install.*
+
+**3. Configure board, processor and port** — the same three settings for **everything**
+in this guide (test sketches and main sketch alike):
+
+| Tools menu | Setting |
+|---|---|
+| Board | **Arduino AVR Boards ▸ Arduino Pro or Pro Mini** |
+| Processor | **ATmega328P (3.3 V, 8 MHz)** |
+| Port | the CP2102's COM port from step 2 |
+
+> ⚠️ The Processor menu defaults to **5 V, 16 MHz** — with that selected, uploads fail with
+> `avrdude: stk500_recv(): programmer is not responding` (wrong bootloader baud) or, if a
+> sketch does land, all serial output is garbled and every delay/interval runs at the wrong
+> speed. If an upload fails, check this menu *first*.
+
+**4. Install the libraries** (Sketch ▸ Include Library ▸ Manage Libraries…):
+
+- **LowPower** by LowPowerLab — required by the main sketch and `06_SleepCurrent`
+- **hp_BH1750** by Stefan Armborst — BH1750 (main sketch + `07_SensorTest`)
+- **ForcedBMX280** by soylentOrange — BMP280 (main sketch + `07_SensorTest`)
+
+**5. Serial monitor** is always **500000 baud** (it is 8 MHz ÷ 16 — the only fast rate with
+zero clock error on these boards). Garbled text almost always means the wrong baud rate.
+
+> **VERIFY (Stage 0):** the CP2102 enumerates as **Silicon Labs CP210x (COMx)** in Device
+> Manager, `tests/01_UploadBlink` compiles in the IDE with the board settings above, and
+> the three libraries appear in Sketch ▸ Include Library.
 > *(The test sketches in this repo have been desk-reviewed but arrive compile-unverified —
 > build one of each in the IDE before the batch session starts.)*
 
@@ -192,8 +227,8 @@ are in a different order, so connect it with jumper leads, matching signal names
 and sensor modules and makes the I2C scan fail (see Troubleshooting: *"UART adapter set to
 5 V instead of 3.3 V"*).
 
-**DTR is required on this build.** Stage 1 clips off the reset switch, so the *only* way to
-reset the board for a code upload is the auto-reset pulse on DTR — it reaches RESET through
+**DTR is required on this build.** The auto-reset pulse on DTR is what resets the board
+for a code upload — it reaches RESET through
 the 0.1 µF cap already fitted on the Pro Mini, so no external cap is needed; connect the
 CP2102's DTR straight to the header's DTR pad (the one marked `GRN` on many boards). Some
 budget CP2102 boards don't break DTR out
@@ -218,27 +253,24 @@ Then, per board:
    back so they can't short against the RTC module later.
 2. **Remove the voltage regulator** — clip it away from the 2-leg side. Left in place it
    back-leaks ~80 µA, which alone would kill a CR2032 in weeks.
-3. **Remove the power-LED limit resistor** (next to the regulator) with the iron tip.
-   Removing the resistor rather than the LED avoids damage to nearby traces.
-4. **Remove the reset switch** (clip it off). This logger is only ever started through
-   serial handshakes — an exposed reset button inside a deployment housing is a liability.
-5. Clean flux residue with isopropyl (flux is mildly conductive and shows up as
-   mystery-µA later).
+3. **Remove the power-LED limit resistor** (directly above the regulator, just below the
+   `PRO MINI` silkscreen — marked `472` on our boards) with the iron tip. Removing the
+   resistor rather than the LED avoids damage to nearby traces. Leave the D13 LED and its
+   resistor (down by the reset switch) alone — the sketch uses that LED as the red
+   indicator channel.
 
-<img src="images/steps/jumper14_blinktesting_900pixw.jpg" width="220" alt="bootloader blink test"> <img src="images/steps/pm1_cliprega_900pixw_square.jpg" width="220" alt="clipping the regulator"> <img src="images/steps/pm6_ledlimitresistorb_900pixwsq.jpg" width="220" alt="removing power LED resistor"> <img src="images/steps/pm4_clipresetswitch_900pixwsq.jpg" width="220" alt="clipping the reset switch">
+<img src="images/steps/jumper14_blinktesting_900pixw.jpg" width="220" alt="bootloader blink test"> <img src="images/steps/pm1_cliprega_900pixw_square.jpg" width="220" alt="clipping the regulator"> <img src="images/steps/pm6_ledlimitresistorb_900pixwsq.jpg" width="220" alt="removing power LED resistor">
 
 *L→R: blink test before any mods · clip the regulator (2-leg side) · lift the power-LED
-limit resistor · clip the reset switch. Header detail:
+limit resistor. Header detail:
 [trimming the UART pin tails](images/steps/prom_headerpins_640pixw.jpg).*
 
-### [OPTIONAL] Add the indicator LED, thermistor & LDR
+### Add the indicator LED, thermistor & LDR
 
 Following the Cave Pearl tutorial, these are soldered onto the Pro Mini **now, during prep,
-before the two modules are joined**. All are optional — the core coin-cell logger runs
-without them. Note the **BURN-IN profile** at the top of this guide logs the NTC and LDR
-channels, so fit this circuit if you want a representative soak test in Stage 4. To skip
-it, comment out the `readD7resistorwD6ref_2byte` / `readD9resistorwD6ref_2byte` defines and
-re-pad the record back to a power of 2 ([Appendix A](#appendix-a--the-powers-of-2-rule)).
+before the two modules are joined**. All are **required** for this build: every profile in
+this guide (BURN-IN, DEPLOY, DEPLOY-XL) drives the RGB LED and logs the NTC channel, and
+the BURN-IN profile also logs the LDR for the Stage 4 soak test.
 
 **RGB indicator LED** — the main sketch expects `LED_GndGB_A0_A2`: common-cathode RGB with
 the **red leg cut off** (the onboard D13 LED — red on most boards, sometimes yellow/green/blue
@@ -455,9 +487,20 @@ that same bus.
    The startup screen must show 8 bytes/record and list: Battery, RTC °C, NTC, BH1750 lux,
    BMP temp. A `not PowerOfTwo → MUST CHANGE CONFIG!` shutdown means the defines don't
    match the profile — fix and re-flash.
-6. **[OPTIONAL]** add the rail buffer capacitor (220–1000 µF tantalum across VCC/GND,
+6. **[OPTIONAL, but see the warning below]** add the rail buffer capacitor (220–1000 µF
+   tantalum across VCC/GND,
    [placement photo](images/steps/2023_indicator-on1000ufcap_900pixw.jpg))
    if a unit shows voltage-sag resets in burn-in data; costs only ~15–25 nA of leakage.
+
+   > **Diagnostic signature of missing rail cap:** if `LoBat[mv]` and `RTC[°C]` both look
+   > perfectly healthy but `[°C]bmE` is stuck at a constant `-0.01` (or another fixed,
+   > wrong value) on **every** record, and/or the NTC's `D7[Ω]` reads implausibly small
+   > (single/low-double digits instead of ~10 kΩ) — while the *exact same unit* reads both
+   > sensors correctly when tethered to UART power — that's not a dead sensor. It's the
+   > coin cell's poor transient current delivery sagging the rail for the few milliseconds
+   > of the BME280 I2C burst / NTC Timer1 capture, which the averaged `LowBat` reading never
+   > catches. UART power (from the USB-serial adapter's regulator) doesn't sag the same way,
+   > which is why the fault only shows up running on the coin cell. Add the rail cap.
 7. Hot-glue the coin cell against its spring contact, run a final short logging interval
    (1-minute interval for an hour), download, and sign off the checklist.
 
@@ -644,8 +687,8 @@ overwrite, so the earliest data is always safe. Run length = 512 × interval (�
 15 min, ≈ 8.5 h at 1 min). For longer deployments lengthen the interval or fit the optional
 32k EEprom ([Appendix B](#appendix-b--optional-storage-upgrade)).
 
-**Starting a run.** Because the reset switch is removed, the logger is only ever started
-through the serial menu at 500000 baud. The sequence is `[2]` set the RTC clock → `[10]`
+**Starting a run.** The logger is only ever started through the serial menu at
+500000 baud. The sequence is `[2]` set the RTC clock → `[10]`
 enter this unit's VREF calibration constant → `[3]` set the interval → `[6]` START. The LED
 pips confirm logging has begun; disconnect the UART and it runs on its own. If the menu
 times out (see Stage 4), just reconnect to bring it back.

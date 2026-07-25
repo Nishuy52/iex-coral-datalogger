@@ -105,12 +105,12 @@ Note: we still have upper 512 bytes of 328p 1k eeprom availible for OLED screen 
 //#define OLED_64x32_SSD1306               // not a sensor, but enabled with define to include needed library - requires 1000uF rail cap to smooth noise from 1306 charge pump!
 
 // Default EEprom: 0x57 & 4096 here saves data into the 4k eeprom on the RTC module:
-#define EEpromI2Caddr 0x57                    // Run a bus scanner to check where your eeproms are https://github.com/RobTillaart/MultiSpeedI2CScanner
-#define totalBytesOfStorage 4096              // Default: 0x57 / 4096bytes to use the 4k eeprom on the RTC module 
+//#define EEpromI2Caddr 0x57                    // Run a bus scanner to check where your eeproms are https://github.com/RobTillaart/MultiSpeedI2CScanner
+//#define totalBytesOfStorage 4096              // Default: 0x57 / 4096bytes to use the 4k eeprom on the RTC module
 
-// If saving to an external 32k I2C EEprom module: 
-//#define EEpromI2Caddr 0x50                  // Run a bus scanner to check where your eeproms are https://github.com/RobTillaart/MultiSpeedI2CScanner
-//#define totalBytesOfStorage 32768           // Default: 0x57 / 4096bytes to use the 4k eeprom on the RTC module 
+// Saving to an external 64k AT24C512 I2C EEprom module (Appendix B):
+#define EEpromI2Caddr 0x50                    // Run a bus scanner to check where your eeproms are https://github.com/RobTillaart/MultiSpeedI2CScanner
+#define totalBytesOfStorage 65536             // AT24C512 64k module
 
 // the Red LED on D13 gets used if BOTH of the following LED #define statements are commented out
 //#define LED_r9_b10_g11_gnd12               // enables code for RGB indicator LED // expects a 1k limit resistor on shared GND!
@@ -143,9 +143,9 @@ bool displayMoreOptions = false;              // Flag toggle between Setup and R
 const char compileDate[] PROGMEM = __DATE__;  //  built-in function in C++ makes text string: Jun 29 2023
 const char compileTime[] PROGMEM = __TIME__;  //  built-in function in C++ makes text string: 10:04:18
 
-#define EEpromI2Caddr 0x57                    // Run a bus scan to check where your eeproms are https://github.com/RobTillaart/MultiSpeedI2CScanner
-#define totalBytesOfStorage 4096        // Default: 0x57 / 4096 bytes for 4k // 32k Module: 0x50 & 32768 
-// 32k I2C EEprom Module: use 0x50 & 32768    // for 64k eeprom (soldered on top of 4k) usually at 0x50 & 65536 with no address pins pulled high
+#define EEpromI2Caddr 0x50                    // Run a bus scan to check where your eeproms are https://github.com/RobTillaart/MultiSpeedI2CScanner
+#define totalBytesOfStorage 65536       // external AT24C512 64k EEprom module
+// Default onboard EEprom on RTC module: 0x57 & 4096 // 32k Module: 0x50 & 32768
 uint8_t sensorBytesPerRecord = 0;             // INCREMENTED at the beginning of setup to match #defined sensors. MUST divide evenly into EEprom Page buffer AND fit inside I2C buffer
 uint32_t EEmemPointer = 0;                   // counter that advances through the EEprom memory locations by sensorBytesPerRecord at each pass through the main loop
 
